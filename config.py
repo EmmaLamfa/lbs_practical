@@ -11,7 +11,7 @@ class Settings(BaseSettings):
     """
 
     # General app Info
-    app_title: str = 'LBS'
+    app_title: str = 'LBS-team-2'
 
     # AWS connections
     aws_access_key_id: str = '<KEY>'
