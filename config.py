@@ -12,6 +12,7 @@ class Settings(BaseSettings):
 
     # General app Info
     app_title: str = 'LBS-team-2'
+    bucket_name = "lbs-team-2"
 
     # AWS connections
     aws_access_key_id: str = '<KEY>'
@@ -57,5 +58,5 @@ class Settings(BaseSettings):
 
 @lru_cache()
 def get_settings():
-    load_dotenv('dev.env')
+    load_dotenv('credentials.env')
     return Settings()

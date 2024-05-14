@@ -1,44 +1,36 @@
 import os
 import boto3
 from dotenv import load_dotenv
+from config import Settings
+from fastapi import UploadFile
 
-load_dotenv('credentials.env')
 
 
-def get_client(service):
+
+def get_client(service: str, settings: Settings):
     session = boto3.session.Session(
-        aws_access_key_id=os.environ['AWS_ACCESS_KEY_ID'],
-        aws_secret_access_key=os.environ['AWS_SECRET_ACCESS_KEY'],
+        aws_access_key_id=settings.aws_access_key_id,
+        aws_secret_access_key=settings.aws_secret_access_key.get_secret_value(),
     )
     return session.client(service, region_name='eu-west-1')
 
 
-def upload_file(file_name, bucket, object_name):
-    s3_client = get_client('s3')
-    response = s3_client.upload_file(file_name, bucket, object_name)
-    print(f'Uploaded {file_name} to s3://{bucket}/{object_name}')
-    return response
+def upload_file_to_s3(s3_client, object_name, bucket_name, file: UploadFile):
+    s3_client.upload_fileobj(file.file, bucket_name, object_name)
+    return object_name
 
 
-def list_files(bucket_name):
-    s3_client = get_client('s3')
-
-    # Initialize paginator to handle buckets with many objects
+def list_files(s3_client, bucket_name):
     paginator = s3_client.get_paginator('list_objects_v2')
-
-    # List objects within the bucket using the paginator
     page_iterator = paginator.paginate(Bucket=bucket_name)
 
-    # Collect all files excluding folders
     files = []
     for page in page_iterator:
         for obj in page.get('Contents', []):  # Ensure there are contents
             key = obj['Key']
             if not key.endswith('/'):  # Exclude folders
                 files.append(key)
-
     return files
-
 
 def generate_presigned_url(bucket_name: str, object_name: str, expiration: int = 3600):
     """Generate a presigned URL to share an S3 object
