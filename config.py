@@ -60,3 +60,6 @@ class Settings(BaseSettings):
 def get_settings():
     load_dotenv('credentials.env')
     return Settings()
+
+
+#testgresa
